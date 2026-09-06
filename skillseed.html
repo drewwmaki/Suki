@@ -1,0 +1,809 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skillseed — one skill a day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --deep:#0C1F1A;
+  --surface:#122C25;
+  --surface2:#183931;
+  --chalk:#EAE6D7;
+  --chalk-dim:#A8B4AC;
+  --amber:#F2B33D;
+  --mint:#79C9A6;
+  --line:rgba(234,230,215,.16);
+  --measure:34rem;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--deep);
+  color:var(--chalk);
+  font-family:"Newsreader",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3,.sans,button,input,label{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif}
+button,input{font-size:1rem;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:2px}
+.wrap{max-width:var(--measure);margin:0 auto;padding:0 20px}
+
+/* ---------- gate ---------- */
+#gate{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:40px 0 64px}
+.mark{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.045em;font-size:clamp(44px,13vw,68px);line-height:.95;margin:0}
+.mark span{color:var(--amber)}
+.tagline{color:var(--chalk-dim);margin:14px 0 34px;max-width:26rem}
+.field{display:block;margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--chalk-dim);margin-bottom:6px}
+.field input{
+  width:100%;padding:13px 14px;background:var(--surface);
+  border:1px solid var(--line);border-radius:10px;font-weight:600;letter-spacing:.01em;
+}
+.field input::placeholder{color:#6E7E76;font-weight:400}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 18px;border:0;border-radius:10px;
+  background:var(--amber);color:#101E19;font-weight:700;letter-spacing:.005em;cursor:pointer;
+}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--chalk);border:1px solid var(--line);font-weight:600}
+.btn[disabled]{opacity:.5;cursor:default}
+.swap{margin-top:18px;color:var(--chalk-dim);font-size:15px}
+.swap button{background:none;border:0;padding:0;color:var(--amber);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.msg{margin:2px 0 14px;color:#F0928A;font-size:14.5px;min-height:1.2em}
+.fineprint{margin-top:28px;font-size:13.5px;color:#6E7E76;line-height:1.5;max-width:24rem}
+
+/* ---------- app chrome ---------- */
+#app{display:none;min-height:100dvh;flex-direction:column}
+#app.on{display:flex}
+header{border-bottom:1px solid var(--line);padding:14px 0 12px;position:sticky;top:0;background:var(--deep);z-index:5}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wordmark{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.03em;font-size:20px}
+.wordmark span{color:var(--amber)}
+.who{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--chalk-dim);cursor:pointer}
+
+/* notch spine */
+.spine{display:flex;gap:5px;align-items:flex-end;margin-top:12px;height:20px}
+.notch{flex:1;height:8px;border-radius:2px;background:rgba(234,230,215,.13)}
+.notch.done{background:var(--mint);height:20px}
+.notch.today{background:var(--amber);height:20px}
+.spinecap{display:flex;justify-content:space-between;font-size:12.5px;color:#6E7E76;margin-top:7px;font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+
+main{flex:1;padding:26px 0 96px}
+
+/* ---------- today ---------- */
+.kicker{font-size:14px;font-weight:700;color:var(--mint);font-family:"Bricolage Grotesque",sans-serif;margin:0 0 8px}
+h1.title{font-weight:800;letter-spacing:-.035em;line-height:1.02;font-size:clamp(31px,8.6vw,42px);margin:0 0 12px}
+.meta{color:#6E7E76;font-size:14px;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;margin-bottom:22px}
+.why{font-size:18.5px;line-height:1.6;margin:0 0 26px;border-left:2px solid var(--amber);padding-left:16px}
+ol.steps{margin:0 0 26px;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding-left:34px;margin-bottom:14px}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;
+  width:22px;height:22px;border-radius:50%;border:1px solid var(--line);
+  display:grid;place-items:center;font-family:"Bricolage Grotesque",sans-serif;
+  font-size:12px;font-weight:700;color:var(--amber);
+}
+.trybox{background:var(--surface);border-radius:12px;padding:16px 18px;margin-bottom:26px}
+.trybox h3{margin:0 0 4px;font-size:14px;font-weight:700;color:var(--mint)}
+.trybox p{margin:0}
+.done-note{display:flex;align-items:center;gap:10px;color:var(--mint);font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;padding:14px 0}
+.tick{width:22px;height:22px;border-radius:50%;background:var(--mint);color:#0C1F1A;display:grid;place-items:center;font-size:13px;flex:none}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .32s ease-out}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+
+/* ---------- log ---------- */
+.searchbar{width:100%;padding:11px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:18px;font-family:"Bricolage Grotesque",sans-serif;font-size:15px}
+.entry{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:15px 0;cursor:pointer}
+.entry:first-of-type{border-top:1px solid var(--line)}
+.entry .day{font-family:"Bricolage Grotesque",sans-serif;font-size:12.5px;font-weight:700;color:#6E7E76;display:flex;gap:8px;align-items:center}
+.entry .day em{font-style:normal;color:var(--mint)}
+.entry .name{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;letter-spacing:-.015em;font-size:19px;line-height:1.25;margin-top:3px}
+.empty{color:var(--chalk-dim);padding:34px 0;max-width:24rem}
+.backlink{background:none;border:0;padding:0;margin-bottom:20px;color:var(--amber);font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:14.5px;cursor:pointer}
+
+/* ---------- stats ---------- */
+.stats{display:flex;gap:26px;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:22px}
+.stat b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1}
+.stat span{font-size:13px;color:#6E7E76;font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+
+/* ---------- tabs ---------- */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tabs{display:flex;max-width:var(--measure);margin:0 auto}
+.tab{flex:1;background:none;border:0;padding:13px 4px 15px;color:#6E7E76;font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:14px;cursor:pointer;border-top:2px solid transparent;margin-top:-1px}
+.tab.on{color:var(--chalk);border-top-color:var(--amber)}
+.view{display:none}
+.view.on{display:block}
+</style>
+
+<!-- =============== GATE =============== -->
+<section id="gate">
+  <div class="wrap">
+    <h1 class="mark">skill<span>seed</span></h1>
+    <p class="tagline">One skill a day. Some will save your life, some will just make you fun at parties. Both count.</p>
+
+    <div class="field">
+      <label for="u">Your name</label>
+      <input id="u" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="pick anything you'll remember">
+    </div>
+    <div class="field">
+      <label for="p" id="plabel">4-digit code</label>
+      <input id="p" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••">
+    </div>
+    <p class="msg" id="gatemsg"></p>
+    <button class="btn" id="go">Sign in</button>
+    <p class="swap" id="swaprow"></p>
+    <p class="fineprint">Your progress is saved to this account so nothing resets. The code is a light lock to keep your streak separate from someone else's — don't reuse a real password.</p>
+  </div>
+</section>
+
+<!-- =============== APP =============== -->
+<div id="app">
+  <header>
+    <div class="wrap">
+      <div class="headrow">
+        <div class="wordmark">skill<span>seed</span></div>
+        <button class="who" id="signout"></button>
+      </div>
+      <div class="spine" id="spine"></div>
+      <div class="spinecap"><span id="spineleft"></span><span id="spineright"></span></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="view on" id="v-today"></section>
+    <section class="view" id="v-log"></section>
+    <section class="view" id="v-shelf"></section>
+  </main>
+
+  <nav><div class="tabs">
+    <button class="tab on" data-v="today">Today</button>
+    <button class="tab" data-v="log">Log</button>
+    <button class="tab" data-v="shelf">Shelf</button>
+  </div></nav>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   SKILLS
+--------------------------------------------------------------- */
+const SKILLS = [
+{id:"cpr",c:"Emergency",t:"Hands-only CPR",m:8,
+w:"If an adult collapses and isn't breathing normally, their odds roughly double when someone starts compressions before the ambulance arrives. Most people freeze because they've never rehearsed the order.",
+s:["Check response: shout and squeeze their shoulders. No response and no normal breathing means start.","Get help. Call your emergency number on speaker and send someone for a defibrillator.","Heel of one hand on the centre of the chest, other hand on top, fingers laced, arms straight, shoulders over your hands.","Push hard and fast — about 5cm deep, 100–120 per minute. The beat of Stayin' Alive is the right tempo.","Don't stop until help takes over or the person moves. Swap with someone else every two minutes if you can."],
+x:"Find the pulse point of your own chest and count out 30 compressions on a cushion at the right tempo. Then look up your local emergency number and say it out loud."},
+
+{id:"choke",c:"Emergency",t:"Help someone who is choking",m:6,
+w:"A person with a blocked airway has minutes and can't ask for help. The universal sign is hands at the throat and silence — real choking is quiet.",
+s:["Ask 'are you choking?' If they can cough forcefully or speak, encourage coughing and stay close.","If they can't, lean them forward and give five sharp blows between the shoulder blades with the heel of your hand.","Still blocked? Stand behind, fist above the navel, other hand over it, and pull sharply inward and upward five times.","Alternate five and five. Call emergency services if the blockage doesn't clear.","If they go limp, lower them down and start compressions.","For a baby, use back blows and chest thrusts instead, never abdominal thrusts."],
+x:"Practise the hand position on yourself: fist thumb-side in, just above the navel. Muscle memory beats recall under panic."},
+
+{id:"bleed",c:"Emergency",t:"Stop heavy bleeding",m:6,
+w:"Serious bleeding can kill in under five minutes — faster than most ambulances. Pressure is the whole skill.",
+s:["Press hard directly on the wound with a cloth, both hands, your body weight behind it.","Don't peek. Lifting to check restarts the clot. Add layers on top instead of swapping.","Keep the limb raised if you can do it without letting up pressure.","If pressure alone fails on an arm or leg, a tourniquet goes 5–7cm above the wound, tightened until bleeding stops. Note the time.","Keep them warm and lying down while you wait."],
+x:"Check what's actually in your bag or car for this. A clean t-shirt counts; nothing counts as nothing."},
+
+{id:"stroke",c:"Emergency",t:"Spot a stroke in ten seconds",m:5,
+w:"Stroke treatment is time-locked — the good options expire in hours. Recognising it fast is worth more than anything you do afterwards.",
+s:["Face: ask them to smile. Does one side droop?","Arms: ask them to raise both. Does one drift down?","Speech: ask them to repeat a sentence. Slurred or jumbled?","Time: any one sign means call emergency services immediately and note the time symptoms started.","Never let them 'lie down and see how they feel'. Never give food, drink, or aspirin."],
+x:"Say the four checks out loud once. Text them to whoever you live with."},
+
+{id:"extinguisher",c:"Emergency",t:"Use a fire extinguisher properly",m:5,
+w:"Most people aim at the flames, which does nothing. You put out fires by hitting the fuel.",
+s:["Decide first: if it's bigger than a bin, leave and close the door behind you.","Pull the pin, twisting to break the seal.","Aim at the base of the fire, not the flames.","Squeeze the handle slowly and evenly.","Sweep side to side, moving in as it dies. Watch for reignition as you back out — never turn your back."],
+x:"Find the nearest extinguisher to where you sleep. Read its label for what it's rated for."},
+
+{id:"burn",c:"Body",t:"Treat a burn without making it worse",m:5,
+w:"Butter, ice, and toothpaste all cause damage. Cool running water is genuinely the treatment, and the window is short.",
+s:["Cool under gentle running water for a full 20 minutes. Start within 20 minutes of the burn.","Remove rings and watches early, before swelling.","Cover loosely with cling film laid on, not wrapped around.","Never ice, never pop blisters, never peel stuck fabric.","Get medical help for burns bigger than the person's palm, or any burn on hands, face, feet, or genitals."],
+x:"Time 20 seconds under a cold tap. Notice how long the real 20 minutes will feel, so you don't quit early."},
+
+{id:"rip",c:"Outdoors",t:"Escape a rip current",m:6,
+w:"Rips drown strong swimmers because instinct says swim for the beach — straight into the one current you can't beat.",
+s:["Recognise it from shore: a gap in the breaking waves, choppy or discoloured water heading out.","If caught, stop fighting. Float and get your breathing under control first.","Swim parallel to the beach until you're out of the pull, usually 20–30 metres.","Then angle back to shore with the waves helping you.","Can't swim out? Float, raise one arm, and shout. Rips run out, not under."],
+x:"Next time you're at any beach, spend one minute reading the water for the gap in the breakers before you go in."},
+
+{id:"float",c:"Outdoors",t:"Survival floating",m:7,
+w:"Exhaustion drowns people, not water. Floating turns a five-minute problem into an hour-long one.",
+s:["Lie back, ears in the water, chin up, look at the sky. Your lungs are the float.","Arms out wide and lazy, like a starfish. Small slow sculls with your hands.","Breathe in fully and hold a beat longer than feels natural — full lungs sit higher.","In rough water, use the face-down version: hang limp, lift your head to breathe every 10 seconds, drop back.","Relax your legs. Tension sinks you."],
+x:"In a pool or bath, exhale fully and notice yourself sink. Inhale fully and feel yourself rise. That's the whole trick."},
+
+{id:"jump",c:"Fix-it",t:"Jump-start a car",m:8,
+w:"A dead battery strands people who are twenty seconds of cable work away from driving home.",
+s:["Park the working car close, both engines off, handbrakes on.","Red clamp to the dead battery's positive terminal, then red to the good battery's positive.","Black clamp to the good battery's negative, then the other black to bare metal on the dead car's engine block — not its battery.","Start the working car, wait two minutes, then start the dead one.","Remove in exact reverse order. Drive 20 minutes to put charge back in."],
+x:"Open your bonnet and find the positive terminal and a bare metal ground point now, in daylight, not at midnight in the rain."},
+
+{id:"tyre",c:"Fix-it",t:"Change a flat tyre",m:10,
+w:"It's a twenty-minute job that people pay for because of two counterintuitive steps.",
+s:["Park flat, handbrake on, hazards on. Chock the opposite wheel.","Crack the nuts loose while the tyre is still on the ground — otherwise the wheel just spins.","Jack at the reinforced point in the sill, never on floor pan or plastic.","Swap the wheel, hand-tighten the nuts in a star pattern.","Lower it, then torque properly in the same star pattern. Recheck after 50km."],
+x:"Confirm you actually have a spare, a jack, and the wheel brace. Many cars now come with a sealant can instead."},
+
+{id:"park",c:"Fix-it",t:"Parallel park by reference points",m:8,
+w:"Parallel parking is not a feel skill. It's three fixed positions, and once you know them the car goes in every time.",
+s:["Pull alongside the front car, about 60cm out, back bumpers roughly level.","Reverse straight until your rear axle lines up with that car's rear bumper. Stop.","Full lock toward the kerb, reverse until your car sits at about 45 degrees to the road.","Straighten the wheel, reverse until your front bumper clears the other car's rear corner.","Full lock the other way and reverse in. Straighten and adjust forward."],
+x:"Use two bins in an empty lot. Six repetitions is usually enough for it to stop feeling like luck."},
+
+{id:"breaker",c:"Fix-it",t:"Reset a tripped breaker safely",m:5,
+w:"Half of all 'power outages' in one room are a switch you can flip yourself — but only after you find out what tripped it.",
+s:["Unplug or switch off whatever was running when the power died.","At the panel, find the breaker sitting between on and off, or fully off.","Push it firmly all the way OFF first, then back ON. Half-flips don't reset it.","If it trips again immediately, stop. That's a fault, not an overload — call an electrician.","A trip that happens only with one appliance plugged in means that appliance is the problem."],
+x:"Go label your panel. Ten minutes now, and you'll never guess in the dark again."},
+
+{id:"drain",c:"Fix-it",t:"Unclog a drain without chemicals",m:8,
+w:"Drain chemicals sit in the pipe eating it, and often don't touch the actual blockage, which is usually hair and grease.",
+s:["Pull the stopper and fish the visible clog out with a bent wire hook or a cheap plastic barbed strip.","Boiling water down a metal pipe cuts grease. Skip it on PVC — use very hot tap water.","Plunge with the overflow hole blocked by a wet cloth, or the pressure escapes.","Still slow? Bucket under the U-bend, unscrew both collars by hand, clean it out, refit.","Monthly: half a cup of baking soda, then vinegar, then hot water."],
+x:"Look under your sink and identify the U-bend and its two hand-tightened collars."},
+
+{id:"water",c:"Fix-it",t:"Find your water shut-off",m:4,
+w:"A burst hose floods a room in minutes. The only thing that stops it is a valve you've already located.",
+s:["Find the main stop valve: usually under the kitchen sink, in a utility cupboard, or at the meter outside.","Turn it clockwise to close. Test it now — old valves seize shut and better to know today.","Learn the local ones too: each toilet and sink has a small isolation valve behind it.","Label the main with tape.","Tell everyone in the house where it is."],
+x:"Go find it and turn it off and on once. That's the whole assignment."},
+
+{id:"tube",c:"Fix-it",t:"Patch a bike tube",m:10,
+w:"A patch costs almost nothing and works permanently. Buying a new tube for every thorn is a tax on not knowing this.",
+s:["Get the wheel off, deflate fully, and lever the tyre off one side only.","Inflate the tube and listen or feel for the leak. Water in a sink finds stubborn ones.","Mark it, then run your fingers inside the tyre to find the thorn or glass still in there — this is the step people skip.","Roughen the tube around the hole, thin layer of glue, wait until tacky, press the patch on hard for a minute.","Tuck the tube in slightly inflated, seat the tyre by hand, inflate, check the bead is even all the way round."],
+x:"Find the puncture on a tube you already gave up on."},
+
+{id:"button",c:"Home",t:"Sew a button back on",m:7,
+w:"A missing button retires a good shirt for most people. This takes four minutes and lasts years.",
+s:["Thread a needle with about 50cm of thread, both ends together, knot the end. Double thread is stronger.","Come up from underneath through the fabric and one hole, down through the opposite one.","Lay a matchstick or toothpick under the button as a spacer so the button has a shank to sit on.","Six passes through each pair of holes.","Remove the spacer, bring the thread up under the button, wind it around the loose threads five times to make a stem, then push through and knot underneath."],
+x:"Sew one on. Even on a shirt that doesn't need it — the winding step is the part that needs practice."},
+
+{id:"iron",c:"Home",t:"Iron a shirt in five minutes",m:8,
+w:"There's an order that eliminates re-ironing what you already did. Most people iron the body first and then crush it doing the sleeves.",
+s:["Iron damp, or use steam. Bone-dry cotton won't hold a crease.","Collar first: underside, then top, working from the points inward.","Cuffs next, inside then out, buttons face down.","Sleeves: line up the seam, flatten, press. Avoid a crease at the top edge unless you want one.","Body last: yoke, then each front panel around the buttons, then the back. Hang it immediately."],
+x:"Do a collar and both cuffs only. On a worn shirt that's 80% of what people see."},
+
+{id:"stain",c:"Home",t:"Get out the four common stains",m:7,
+w:"Almost every ruined garment was ruined by the first thing someone did to it. Heat and rubbing set stains permanently.",
+s:["Blot, never rub. Rubbing pushes the stain into the fibres and frays them.","Work cold. Hot water cooks protein stains — blood, egg, milk — into the fabric for good.","Grease and oil: cover in cornflour or talc, leave 15 minutes, brush off, then dish soap directly on the mark.","Red wine, coffee, tea: cold water flush, then a paste of salt, then dish soap with a splash of hydrogen peroxide on whites.","Ink: dab from behind with alcohol on a cloth, with a towel underneath to catch it.","Never tumble dry until the stain is truly gone."],
+x:"Check the stains you already have on things in the wardrobe. Most are still fixable."},
+
+{id:"sheet",c:"Home",t:"Fold a fitted sheet flat",m:6,
+w:"There's an actual method. The ball of fabric in your cupboard is a solved problem.",
+s:["Hold it inside out with a hand in each of two adjacent corners, seams facing you.","Bring one hand to the other and fold that corner over the second, so it swallows it.","Pick up the two corners hanging below and fold them in the same way. All four corners now nest.","Lay it flat and square off the curved edge by folding the elastic edges in.","Fold into thirds, then in half."],
+x:"Do it once with a pillowcase first — same move, less fabric to fight."},
+
+{id:"foldshirt",c:"Party trick",t:"Fold a shirt in two seconds",m:5,
+w:"The Japanese pinch fold looks like sleight of hand and packs a suitcase in half the time.",
+s:["Lay the shirt face up. Imagine a vertical line down from the shoulder, a quarter in from the left.","Pinch point A at the shoulder on that line. Pinch point B halfway down that same line.","Cross your arms and grab point C, the bottom hem on that line, without letting go of A and B.","Uncross your arms while lifting — the shirt folds itself in thirds.","Lay it down and fold the loose sleeve side under."],
+x:"Ten reps. The first three feel impossible and the fourth clicks."},
+
+{id:"tie",c:"Style",t:"Tie a tie two ways",m:8,
+w:"The four-in-hand for slim collars, the half-Windsor when you want symmetry. Two knots covers a lifetime.",
+s:["Start with the wide end on your right, hanging about 30cm lower than the narrow end.","Four-in-hand: wide over narrow, under, over again, up through the neck loop, down through the front loop. Slight asymmetry is the point.","Half-Windsor: wide over narrow, up through the neck loop, down and around the back to the left, across the front, up through the neck loop, down through the front loop.","Tighten by holding the knot and sliding the narrow end, never by yanking the wide end.","Aim for the tip to hit your belt buckle. A dimple under the knot means you pinched it before tightening."],
+x:"Tie one, take a photo, adjust the length, do it again. Two tries usually lands it."},
+
+{id:"shoes",c:"Style",t:"Polish leather shoes",m:9,
+w:"Leather is skin. Conditioned regularly, a good pair outlives ten cheap ones.",
+s:["Brush off dirt, remove laces.","Wipe with a barely damp cloth and let dry fully.","Cream polish first, worked in with a cloth in small circles — cream feeds and colours.","Buff hard with a horsehair brush, then a soft cloth.","For a shine on the toe cap only: wax polish, a drop of water, tiny circles until it goes glassy.","Cedar shoe trees while they rest."],
+x:"Do just the toe caps of one pair. The difference is dramatic enough to be motivating."},
+
+{id:"bowline",c:"Outdoors",t:"Tie a bowline",m:6,
+w:"The one knot to know: a loop that won't slip, won't tighten on whatever's inside it, and unties easily after load.",
+s:["Make a small loop in the standing part, leaving a long working end.","The rabbit comes up out of the hole.","Around the back of the tree — the standing part.","Back down the hole.","Dress it and pull tight. Test by loading it — the loop must not close."],
+x:"Tie it ten times, then tie it behind your back. That's when it's actually yours."},
+
+{id:"trucker",c:"Outdoors",t:"Tie a trucker's hitch",m:7,
+w:"A rope tensioner that gives you roughly three times your pulling force. This is how loads stay on roofs.",
+s:["Anchor one end. Partway along the rope, make a loop with a twist so it holds — a slippery half hitch works.","Pass the working end around the far anchor point.","Bring it back up and through your loop. That loop is now a pulley.","Pull down hard. Feel the mechanical advantage.","Lock it off with two half hitches under tension."],
+x:"Tension a rope between two chairs. Try to push them together — you won't."},
+
+{id:"knife",c:"Kitchen",t:"Sharpen a kitchen knife",m:9,
+w:"A dull knife causes more cuts than a sharp one because it slides instead of biting. Sharpening is a five-minute skill people outsource forever.",
+s:["Soak a whetstone for 10 minutes. Coarse side up.","Hold the blade at about 15–20 degrees — two stacked coins under the spine is close.","Push away from you along the stone, edge leading, using the whole length of the blade. Even pressure.","Ten passes one side, ten the other, until you feel a slight burr on the opposite edge.","Flip to the fine side and repeat with lighter pressure. Finish by stropping on a leather belt or cardboard.","Test on paper — a sharp knife slices, a dull one tears."],
+x:"Test every knife you own on a sheet of paper. Sharpen the one you use most."},
+
+{id:"onion",c:"Kitchen",t:"Chop an onion fast",m:7,
+w:"Uniform dice cook evenly, and the professional method is fewer cuts, not faster hands.",
+s:["Cut it in half through the root. Peel, leaving the root end intact — the root is what holds it together.","Flat side down. Make horizontal cuts toward the root, stopping short of it.","Make vertical cuts down, again stopping at the root, angled slightly toward the centre.","Slice across. The dice falls apart on its own.","Claw your guide hand: fingertips tucked, knuckles against the blade.","Chill the onion for 15 minutes first and your eyes stay dry."],
+x:"Do one onion slowly, prioritising even size over speed. Speed arrives on its own."},
+
+{id:"rice",c:"Kitchen",t:"Cook rice by finger, no measuring",m:6,
+w:"The knuckle method works across pot sizes and quantities, which is why it survived a few thousand years.",
+s:["Rinse until the water runs mostly clear. This is the difference between fluffy and gluey.","Level the rice. Rest your fingertip on the surface and add water to the first knuckle joint.","Bring to a boil uncovered, then drop to the lowest heat and cover.","12 minutes. Do not lift the lid — every peek costs you steam.","Off the heat, still covered, 10 more minutes. Then fluff with a fork, never a spoon."],
+x:"Cook a cup this way tonight and compare it to how you usually do it."},
+
+{id:"steak",c:"Kitchen",t:"Sear a steak properly",m:9,
+w:"Restaurant crust comes from dryness and heat, not from expensive meat.",
+s:["Salt it and leave it uncovered in the fridge for at least an hour — overnight is better. Dry surface, real crust.","Take it out 30 minutes before. Pat bone dry again.","Pan smoking hot, thin film of high-smoke-point oil. Lay the steak away from you.","Don't move it for two minutes. Flip. For thick cuts, flip every minute after that.","Butter, garlic, thyme at the end, tilt and spoon it over for a minute.","Rest half as long as you cooked it. Cutting early dumps the juice on the board."],
+x:"Salt a steak tonight, cook it tomorrow. The dry-brine step is the one worth proving to yourself."},
+
+{id:"vin",c:"Kitchen",t:"Make a vinaigrette from memory",m:5,
+w:"Three parts oil to one part acid, plus an emulsifier. Once you hold the ratio you never buy dressing again.",
+s:["Jar: 1 part vinegar or lemon juice, a teaspoon of mustard, salt, pepper.","Shake to dissolve the salt.","Add 3 parts oil. Shake hard — the mustard binds it.","Taste. Flat means more salt. Harsh means a pinch of sugar or honey. Greasy means more acid.","Vary it: shallot, garlic, miso, soy, tahini, herbs. The 3:1 skeleton stays."],
+x:"Make a small jar and taste it before and after the salt. The jump is bigger than you'd expect."},
+
+{id:"coffee",c:"Kitchen",t:"Brew coffee that tastes like it cost more",m:7,
+w:"Four variables cover almost all of the difference: ratio, grind, water temperature, and freshness.",
+s:["Weigh it. 60g of coffee per litre of water, roughly 1:16. Guessing is the main cause of bad coffee.","Grind just before brewing. Ground coffee is stale in about 15 minutes.","Water just off the boil, around 92–96°C. Boiling water scorches it.","Pour a little first and wait 30 seconds — the bloom lets trapped gas escape so water can extract evenly.","Sour and thin means under-extracted: grind finer or brew longer. Bitter and dry means the opposite."],
+x:"Brew your usual cup but weigh the coffee and water once. Most people are wildly off their intended ratio."},
+
+{id:"egg",c:"Party trick",t:"Crack an egg one-handed",m:5,
+w:"Small, useless, and satisfying — and it genuinely speeds up cooking once it's automatic.",
+s:["Crack on a flat surface, not the bowl rim. Rim cracks push shell inward.","Hold the egg with your thumb and index on one side, ring and little finger on the other, middle finger across the crack.","One firm tap to make a clean fracture line.","Pull apart by spreading your fingers — the middle finger opens the gap.","Practise over a bowl and expect to lose a few."],
+x:"Six eggs, then make an omelette out of the evidence."},
+
+{id:"pansauce",c:"Kitchen",t:"Make a pan sauce from nothing",m:7,
+w:"The brown stuff left in the pan after cooking meat is concentrated flavour. Three minutes turns it into sauce.",
+s:["Pour off excess fat but keep the brown bits stuck to the pan.","Off the heat, add a splash of wine, stock, or even water. It'll hiss.","Scrape hard with a wooden spoon while it bubbles. Everything lifts.","Reduce by half, then swirl in cold butter off the heat until it goes glossy. Don't let it boil after the butter.","Finish with acid — lemon or vinegar — and salt."],
+x:"Do it after your next fried chicken or pork chop. Same pan, no extra washing up."},
+
+{id:"taste",c:"Kitchen",t:"Fix a dish that tastes flat",m:6,
+w:"Bland almost never means 'needs more herbs'. It usually means one of four levers is missing.",
+s:["Salt first. Add a pinch, stir, taste. Most 'missing something' is salt.","Still flat? Acid. A squeeze of lemon or a splash of vinegar wakes everything up.","Still flat? Fat. Butter, oil, cream carries flavour to your tongue.","Still flat? Umami — soy, fish sauce, parmesan, tomato paste, mushroom.","Too salty: dilute or add acid and fat, not sugar. Too spicy: fat and acid. Too sweet: salt and acid."],
+x:"Take something bland from your fridge and fix it using only these four levers, one at a time."},
+
+{id:"whistle",c:"Party trick",t:"Whistle with your fingers",m:9,
+w:"Carries across a stadium. Also the fastest way to get a taxi, a dog, or a friend's attention.",
+s:["Wet your lips. Make an OK sign with thumb and middle finger, or use both index fingers.","Push your lips over your teeth and pull your bottom lip taut.","Push your fingertips just under the tip of your tongue and fold the tongue back about a centimetre.","Seal your lips around your fingers — air only escapes through the small gap.","Blow steadily and hard, adjusting your tongue angle a millimetre at a time until it screams."],
+x:"Five minutes of blowing air with tiny angle changes. Nearly everyone gets it inside three sessions."},
+
+{id:"juggle",c:"Party trick",t:"Juggle three balls",m:10,
+w:"The classic 'I could never' skill that most people can do in an afternoon if they learn it in the right order.",
+s:["One ball: throw from hand to hand in an arc peaking at eye level. Fifty catches without moving your feet.","Two balls: throw the first, and when it peaks, throw the second. Catch, catch. Don't pass a ball across.","Two balls both directions until it's boring.","Three: two in your dominant hand, one in the other. Throw, peak, throw, peak, throw. Just three throws, let them drop.","Add a fourth throw, then a fifth. Chase the rhythm, not the catches."],
+x:"Do it over a bed so you're not bending down constantly. Rolled socks work fine."},
+
+{id:"pen",c:"Party trick",t:"Spin a pen around your thumb",m:8,
+w:"Pure fidget theatre. It also builds surprisingly useful finger independence.",
+s:["Hold the pen between index and middle finger, thumb supporting, weight balanced past your grip.","Push off with your middle finger while releasing your index — flick, don't throw.","The pen rotates around your thumb as the pivot.","Catch it back between index and middle. Land it, then repeat.","Use a heavier pen at first — momentum forgives bad flicks."],
+x:"Twenty attempts. Failing is normal for the first fifteen."},
+
+{id:"cards21",c:"Party trick",t:"The 21-card trick",m:8,
+w:"A self-working mind-reading trick — no sleight of hand, just an algorithm that always finds their card.",
+s:["Deal 21 cards face up into three columns of seven, left to right, one at a time.","Ask which column their card is in.","Gather the piles so the chosen column goes in the middle.","Repeat the deal and question exactly three times total, always sandwiching their column.","Their card is now the 11th card. Deal ten and reveal the eleventh."],
+x:"Run it on yourself with a card you've chosen. It works every time — that's the point."},
+
+{id:"shuffle",c:"Party trick",t:"Riffle shuffle and bridge",m:8,
+w:"The satisfying cascade. Also actually randomises a deck, which overhand shuffling barely does.",
+s:["Split the deck in two, roughly even. Hold each half in one hand, thumbs on the inner corners.","Bend both halves slightly upward with your thumbs, ends facing each other.","Release both thumbs slowly and evenly so the cards interleave.","Push the halves together at the ends to square them.","For the bridge: after riffling, bend the whole deck upward from both ends and release — the cards cascade into place.","Do it on a table until your hands learn it, then in the air."],
+x:"Seven riffle shuffles is the number mathematicians say properly randomises a deck. Count them once."},
+
+{id:"stone",c:"Outdoors",t:"Skip a stone",m:6,
+w:"Physics you can feel. The angle matters far more than the strength.",
+s:["Pick flat, palm-sized, slightly triangular. Weight helps against wind.","Index finger hooked along one edge, thumb on top, middle finger under.","Crouch low. The throw is sidearm, almost parallel to the water.","Release at about 20 degrees to the surface — the sweet spot researchers actually measured.","Flick your wrist hard at release. Spin is what keeps the stone stable between skips."],
+x:"Ten stones focusing only on spin. Distance follows."},
+
+{id:"frisbee",c:"Outdoors",t:"Throw a frisbee accurately",m:6,
+w:"Most people throw with their arm and the disc curves away. It's a wrist snap plus a level release.",
+s:["Grip: thumb on top, index along the rim, other fingers curled underneath.","Stand side-on to your target, disc across your body.","Pull through with your elbow leading, close to your body.","Snap the wrist at the last moment. That's where the spin — and the flight — comes from.","Release flat. Tilted release means curved flight, every time."],
+x:"Throw twenty at a tree from fifteen metres. Watch the tilt at release, not the landing."},
+
+{id:"fall",c:"Body",t:"Fall without hurting yourself",m:8,
+w:"The instinct to catch yourself on a stiff arm is how wrists break. Rolling spreads the force out over your whole body.",
+s:["Tuck your chin to your chest immediately. Protecting your head comes first, always.","Never land on a straight arm. Bend and let it collapse gradually.","Turn the fall into a roll: contact on one shoulder blade, diagonally across the back to the opposite hip.","Keep round — round rolls, flat slaps.","Exhale on impact. Holding your breath tenses everything."],
+x:"Practise the shoulder roll from a crouch on a soft surface, slowly, both sides."},
+
+{id:"jar",c:"Home",t:"Open any stuck jar",m:4,
+w:"Not strength. Four tricks, in order of effort.",
+s:["Break the vacuum: tap the lid edge against the counter at an angle, or lever the lid with a spoon until it clicks.","Grip: dry your hands, use a rubber glove, a wide rubber band, or a silicone mat.","Heat: hot tap water over the metal lid for 30 seconds. Metal expands faster than glass.","Leverage: slide a butter knife under the lip and twist gently to let air in.","Push down while turning — it seats the threads instead of jamming them."],
+x:"Try the spoon-lever click on the next jar. It's usually enough on its own."},
+
+{id:"carry",c:"Body",t:"Lift and carry without wrecking your back",m:6,
+w:"Back injuries from lifting are mostly technique, and the technique is three things that take a week to become automatic.",
+s:["Get close. Load held away from your body multiplies the force on your spine several times over.","Hinge at the hips, not the waist. Chest up, back flat, bum back — like closing a car door with your hip.","Brace your stomach as if you're about to be poked, then lift with your legs.","Never twist under load. Move your feet.","Two smaller trips beat one heroic one. So does asking."],
+x:"Pick up something heavy today using the hinge. Feel where the effort goes — it should be legs and glutes."},
+
+{id:"cable",c:"Home",t:"Coil a cable so it never tangles",m:5,
+w:"Over-under coiling is how every sound engineer wraps cable. The tangles you fight come from the way you wound it.",
+s:["Hold the cable end in your non-dominant hand.","First loop: grab the cable palm-up and loop it forward, naturally.","Second loop: rotate your hand palm-down and loop it backward, so the twist reverses.","Alternate. Each backward loop cancels the twist from the forward one.","Secure with a tie in the middle, not wrapped around the whole coil."],
+x:"Do your charging cable. Then throw the coil on the floor — a proper over-under coil lands flat and pulls straight."},
+
+{id:"names",c:"Social",t:"Actually remember names",m:6,
+w:"You don't forget names. You never encode them — you're busy thinking about what to say next.",
+s:["Decide, in advance, that hearing the name is the job for the first ten seconds.","Say it back immediately: 'Marco, good to meet you.'","Attach one image — Marco, Marco Polo, a map. Absurd sticks better than sensible.","Use it once in the middle of the conversation, and once when you leave.","Missed it? Ask right away. Ten seconds in it costs nothing. Ten minutes in it costs a lot."],
+x:"Do the repeat-back on the next three people you meet, including baristas."},
+
+{id:"smalltalk",c:"Social",t:"Small talk that goes somewhere",m:7,
+w:"Small talk fails when it stays factual. The trick is offering something back so the other person has a hook.",
+s:["Ask a question, then answer it yourself with a detail. Question alone is an interview; detail alone is a monologue.","Trade the specific, not the general. 'Busy week' closes. 'I've been dismantling a coffee machine all week' opens.","Listen for the emotional word, not the factual one, and follow it. 'Finally moved' — ask about 'finally'.","Notice when someone lights up and stay there. That's the actual conversation.","Have a graceful exit: 'I'm going to get a drink — good to meet you.'"],
+x:"In your next conversation, follow one emotional word instead of the fact next to it."},
+
+{id:"listen",c:"Social",t:"Listen so people feel heard",m:6,
+w:"Most listening is waiting. Reflecting back what someone means does more for a relationship than any advice you can give.",
+s:["Don't prepare your reply while they talk. If you're composing, you're not listening.","Reflect the feeling, not the facts: 'That sounds exhausting' beats 'So then what happened?'","Let silence sit for three seconds after they stop. People say the real thing in that gap.","Ask before advising: 'Do you want thoughts, or do you want to vent?' This question defuses most arguments.","Don't top their story with yours."],
+x:"Ask the vent-or-advice question once this week. Watch how much tension it takes out of the room."},
+
+{id:"no",c:"Social",t:"Say no without burning the bridge",m:6,
+w:"Vague no's invite negotiation and leave people annoyed. A clean no is kinder than a maybe you don't mean.",
+s:["Answer early. Slow no's cost people more than fast ones.","Be clear and short: 'I can't take that on.' No essay — long explanations read as an invitation to solve them.","You can be warm without being available: appreciate the ask, decline the ask.","Offer one alternative if you actually have one. If not, don't invent one.","Don't apologise repeatedly. One is plenty."],
+x:"Write your no in one sentence before you send it. If it's longer, you're negotiating with yourself."},
+
+{id:"negotiate",c:"Money",t:"Negotiate a price",m:8,
+w:"Most prices are more flexible than they look, and most people never test it because they're afraid of the silence.",
+s:["Find out what things actually sell for before you open your mouth. Information beats nerve.","Let them name a number first when you can — the first number anchors the whole conversation.","Ask an open question, not a yes/no one: 'What's the best you can do?' not 'Can you do 20% off?'","Then say nothing. Silence is the most underused tool in the room.","Trade, don't beg: 'I'll take both today at that price', 'I'll pay cash now'.","Be willing to walk, warmly. Leaving on good terms often brings a call back."],
+x:"Ask 'what's the best you can do?' once this week, then hold the silence for five full seconds."},
+
+{id:"toast",c:"Social",t:"Give a 60-second toast",m:7,
+w:"Being asked to say something is a small terror. There's a template that works at weddings, farewells, and birthdays.",
+s:["Stand, raise the glass, wait for quiet. Don't start into noise.","Say who you are and how you know them. One line.","Tell one specific story. Not a list of virtues — one moment, with a detail that only you would know.","Say what that story shows about them. That's the whole point of the toast.","Turn to them, say the wish, raise the glass, sit down. Under 90 seconds, always."],
+x:"Draft one for someone you love, right now, in five sentences. You'll be ready when it's suddenly your turn."},
+
+{id:"coldemail",c:"Social",t:"Write a cold message that gets a reply",m:8,
+w:"Reply rates come down to how quickly the reader can tell what you want and why you're asking them specifically.",
+s:["Subject: concrete and small. 'Question about your 2019 kiln design' beats 'Quick chat?'","First line proves you know their work. One specific detail — no flattery.","Second line: who you are, in one clause.","Third line: the ask, exactly one, and small enough to say yes to in a sentence.","Make it easy to decline. 'No worries if not' raises reply rates.","Five sentences maximum. Send Tuesday morning."],
+x:"Write one to someone whose work you admire. Cut it until it's five sentences, then send it."},
+
+{id:"apology",c:"Social",t:"Apologise properly",m:6,
+w:"Most apologies fail on the same word: 'but'. A real one has four parts and no defence.",
+s:["Name what you did, specifically. Not 'if I upset you' — 'I interrupted you in front of your team.'","Say the impact you understand it had. Show you get why it landed badly.","No 'but', no explanation of your intentions. Intent is your comfort, not their repair.","Say what you'll do differently. Concrete.","Then stop talking and let them respond. Don't ask to be forgiven — that puts the work back on them."],
+x:"Rewrite an apology you've given before without the word 'but'. Notice what has to change."},
+
+{id:"exits",c:"Emergency",t:"Read a room for exits",m:5,
+w:"In an emergency people head for the door they came in through, even when a nearer one is open. Five seconds of looking rewires that default.",
+s:["When you sit down anywhere unfamiliar, find two exits, including one that isn't the main entrance.","Count the rows or doors between you and each one. In smoke you'll be counting, not seeing.","Notice where the staff go. Staff doors lead out.","On a plane, count seat rows to the nearest exit and the one behind you.","In a hotel, walk the corridor to the stairwell once before you unpack."],
+x:"Do it at your next restaurant. It takes five seconds and then it's a habit."},
+
+{id:"palace",c:"Mind",t:"Build a memory palace",m:9,
+w:"The oldest memory technique there is. Lists you'd forget in a minute become effortless when attached to a place you already know.",
+s:["Pick a route you know cold — your walk from the front door to your bed.","Fix 10 stops in order: door, shoe rack, hallway mirror, kitchen sink.","Turn each item into an absurd image and put it at a stop. Milk? A cow drinking from your bathroom sink.","Make it violent, huge, moving, or funny. Bland images vanish.","Walk the route in your head twice to store it. Walk it again to recall."],
+x:"Memorise a 10-item shopping list this way, then recall it backwards tonight."},
+
+{id:"eleven",c:"Mind",t:"Multiply by 11 in your head",m:5,
+w:"A two-second party trick that also teaches you the general shape of mental arithmetic: split, don't grind.",
+s:["Two digits: split them apart and put their sum in the middle. 43 × 11 → 4_3, 4+3=7 → 473.","If the middle sum is 10 or more, carry left. 78 × 11 → 7_8, 7+8=15 → 7+1=8 → 858.","Longer numbers: write the first digit, then each adjacent pair summed, then the last digit.","Related trick: to multiply by 5, halve it and multiply by 10.","And ×9: multiply by 10, subtract the original."],
+x:"Do five two-digit numbers in your head right now. 36×11, 82×11, 57×11."},
+
+{id:"fermi",c:"Mind",t:"Estimate anything to the right order of magnitude",m:8,
+w:"Fermi estimation replaces 'I have no idea' with a number good enough to make decisions on. Errors in the pieces cancel out.",
+s:["Break the unknown into things you can guess. Piano tuners in a city? Start with population.","Guess each piece to the nearest power of ten. Precision is not the goal.","Use ranges when unsure and take the middle.","Multiply through, then sanity-check against something you know.","Being within 10× is a win. Most people's intuition is off by 1000×."],
+x:"Estimate how many cups of coffee your city drinks per day. Then check one of your assumptions."},
+
+{id:"practice",c:"Mind",t:"Practise so you actually improve",m:7,
+w:"Hours don't make you better. People plateau for decades doing something daily, because repetition without feedback is just maintenance.",
+s:["Work at the edge, not in comfort. If you're succeeding every time it's not practice.","Isolate one component. Not 'play the song' — the four bars you keep fumbling.","Get feedback fast. Record yourself if no one is watching.","Short and frequent beats long and rare. Twenty minutes daily outruns three hours on Sunday.","Sleep between sessions. Consolidation happens overnight, not during."],
+x:"Pick something you're stuck at and name the one component that's failing. That naming is most of the work."},
+
+{id:"cornell",c:"Mind",t:"Take notes you'll actually use",m:6,
+w:"Transcribing is the worst way to learn. Notes should force you to process, not just record.",
+s:["Split the page: a wide right column for notes, a narrow left one for cues, a strip at the bottom.","During: notes in the right column. Fragments, not sentences. Leave white space.","Within a day: write questions in the left column that your notes answer.","Bottom strip: summarise the whole page in two sentences from memory.","Revise by covering the right column and answering your own questions."],
+x:"Do it on the next thing you watch or read. The summary from memory is the part that does the work."},
+
+{id:"skim",c:"Mind",t:"Skim a long text without missing the point",m:6,
+w:"Reading everything at the same speed is why long documents feel impossible. Structure tells you where the content is.",
+s:["Read the first and last paragraphs completely. Arguments live at the ends.","Read the first sentence of every other paragraph. Well-written prose puts the claim there.","Look for signal words — however, therefore, in contrast — and slow down there.","Note the questions you still have, then hunt only for those answers.","Only then decide whether it deserves a full read."],
+x:"Skim a long article this way in three minutes, then summarise it in two sentences and check yourself."},
+
+{id:"box",c:"Body",t:"Box breathing to calm down fast",m:5,
+w:"A physiological override, used by people who need to think clearly under pressure. Slow exhales shift you out of fight-or-flight.",
+s:["Breathe in through your nose for 4 counts.","Hold for 4.","Out through your mouth for 4.","Hold empty for 4. That's one box.","Four to six rounds. Make the exhale longer than the inhale if you're really wound up — 4 in, 6 out."],
+x:"Do four rounds now and notice your heart rate before and after."},
+
+{id:"posture",c:"Body",t:"Set up a desk that doesn't hurt you",m:7,
+w:"Neck and shoulder pain from screens is a geometry problem, and the fix is a five-minute one-time adjustment.",
+s:["Screen top at eye level, an arm's length away. Laptop users: stand it on books and use a separate keyboard.","Elbows at about 90 degrees, forearms level, wrists straight and floating, not resting.","Feet flat. If they dangle, get a box.","Sit back into the chair — the backrest is the point of the chair.","Move every 30 minutes. The best posture is the next one."],
+x:"Adjust one thing on your setup right now. Screen height is usually the biggest win."},
+
+{id:"light",c:"Body",t:"Fix your sleep with light",m:7,
+w:"Your body clock is set by light hitting your eyes, not by willpower or how tired you feel.",
+s:["Get outside within an hour of waking, for 10 minutes. Cloudy still works — outdoor light is far brighter than indoor.","Keep a fixed wake time, including weekends. Wake time anchors the clock; bedtime follows.","Dim overhead lights two hours before bed and use lamps low down.","Cool, dark, quiet room. Cooler than feels natural at first.","If you can't sleep after 20 minutes, get up and do something dull in dim light. Don't lie there teaching your brain that bed means frustration."],
+x:"Set an alarm 20 minutes after your usual wake time — but for going outside, not for waking up."},
+
+{id:"phish",c:"Digital",t:"Spot a scam message",m:7,
+w:"Modern scams are well-written and look right. They're caught by structure, not spelling.",
+s:["Urgency plus authority is the signature. 'Your account will be closed in 24 hours' is the tell.","Check the sender's actual domain, not the display name. Scammers control the display name.","Hover or long-press links to see the real destination before tapping.","Never act inside the message. Open your app or type the site address yourself.","Legitimate organisations never ask for codes, passwords, or remote access over a call.","If it's about money and it's rushing you, it's a scam until proven otherwise."],
+x:"Look at the last message you were suspicious of and find which of these it fails."},
+
+{id:"pw",c:"Digital",t:"Stop reusing passwords",m:8,
+w:"One leaked site exposes every account sharing that password. Automated tools try the combination everywhere within hours.",
+s:["Install a password manager. Any reputable one beats none.","Make one strong master phrase — four random words, long, memorable, written down somewhere physical and safe.","Turn on two-factor everywhere, using an authenticator app rather than SMS where you can.","Fix your email password first. Whoever owns your email can reset everything else.","Use passkeys where offered — nothing to steal or phish.","Fix the rest gradually as you log into things."],
+x:"Change your email password today and turn on two-factor on it. That one account is the master key."},
+
+{id:"backup",c:"Digital",t:"Back up so you never lose anything",m:7,
+w:"Everyone learns this the same way — after the loss. The 3-2-1 rule is the whole discipline.",
+s:["Three copies of anything that matters.","On two different types of storage — the computer plus an external drive, say.","One of them off-site. Cloud counts. A drive at a relative's house counts.","Automate it. Manual backups stop within a month.","Test a restore once. An untested backup is a rumour."],
+x:"Name the files you'd genuinely mourn. Check right now whether a second copy exists."},
+
+{id:"photo",c:"Party trick",t:"Take a photo that looks composed",m:8,
+w:"Better photos come from light and position, not gear. Four habits change everything.",
+s:["Move your feet. Nine out of ten weak photos were taken from wherever the photographer happened to stand.","Light on the subject's face. Backlight makes silhouettes; window light beside them is flattering.","Put the subject off-centre, on a third. Give them space to look into.","Get low for objects, get level for people, get closer than feels comfortable.","Tap to expose on the face, then drag down slightly. Shadows recover; blown-out highlights don't."],
+x:"Photograph one thing from six positions. Compare them — the difference will be bigger than any filter."},
+
+{id:"budget",c:"Money",t:"Budget with 50/30/20",m:7,
+w:"Detailed budgets fail because they're tedious. A three-bucket split survives contact with real life.",
+s:["Take your take-home pay. 50% needs, 30% wants, 20% savings and debt.","Sort ruthlessly: needs are things that break your life if they stop. Streaming is a want.","Automate the 20% on payday. Whatever's left is genuinely spendable and you stop tracking coffee.","If needs exceed 50%, the fix is usually rent or transport, not small cuts.","Review the ratio quarterly, not weekly."],
+x:"Add up your fixed monthly commitments and see what share of income they take. That number tells you most of what you need to know."},
+
+{id:"compound",c:"Money",t:"Feel how compounding works",m:6,
+w:"Compounding is counterintuitive because it does nothing visible for years and then everything at once.",
+s:["Rule of 72: divide 72 by the annual rate to get years to double. At 7%, money doubles in about a decade.","Run it four times. A doubling every ten years is 16× in forty years.","The same rule works against you: debt at 18% doubles in four years.","Time matters more than amount. Starting at 25 with small sums beats starting at 40 with large ones.","Fees compound too. A 1% annual fee eats a startling share over decades."],
+x:"Apply the rule of 72 to any debt you have. The number is usually motivating."},
+
+{id:"contract",c:"Money",t:"Find the teeth in a contract",m:8,
+w:"You don't need to read every clause. Six things cause almost all the pain, and they're findable in ten minutes.",
+s:["How does it end? Notice period, break clauses, and what auto-renews.","What does it actually cost? Look for fees outside the headline number and any escalation clause.","Who's liable when it goes wrong, and is liability capped?","What happens on late payment or early exit — penalties are where the money is.","Who owns what you make or provide?","Search the document for 'sole discretion', 'indemnify', 'perpetual', and 'irrevocable'. Read every hit slowly."],
+x:"Search a contract you've already signed for those four words. Educational, if unsettling."},
+
+{id:"label",c:"Body",t:"Read a nutrition label properly",m:6,
+w:"Front-of-pack claims are marketing. The panel on the back is regulated, and it's readable in thirty seconds.",
+s:["Check serving size first. Everything else on the panel is per serving, and servings are often absurdly small.","Compare per 100g between products — that's the honest comparison.","Ingredients are listed by weight. If sugar appears in the first three, it's a sugary product.","Sugar has many names: syrup, dextrose, maltose, concentrate, nectar. Split names hide the total.","'Light', 'natural', and 'no added sugar' are largely unregulated. The panel isn't."],
+x:"Compare two similar products in your kitchen per 100g. The gap is often surprising."},
+
+{id:"north",c:"Outdoors",t:"Find north without a compass",m:7,
+w:"Phone dead, no landmarks. Three independent methods, none needing equipment.",
+s:["Analogue watch, northern hemisphere: point the hour hand at the sun. Halfway between it and 12 is south. Southern hemisphere: point 12 at the sun, halfway to the hour hand is north.","Shadow stick: plant a stick, mark the shadow tip, wait 15 minutes, mark again. The first mark is west, the second east.","At night in the north: find the Plough, follow the two end stars of the pan five times their distance to Polaris. That's north.","In the south: find the Southern Cross, extend its long axis about four and a half times. That point is due south.","Sun rises roughly east and sets roughly west year-round — good enough for a rough bearing."],
+x:"Do the shadow-stick method in a sunny spot today and check it against your phone's compass."},
+
+{id:"map",c:"Outdoors",t:"Navigate with a paper map",m:9,
+w:"When there's no signal, a map and a bearing are all there is. It's a two-part skill: orient, then follow.",
+s:["Orient the map: rotate it until its features line up with the land, or align north on the map with north on a compass.","Locate yourself by matching two or three visible features — a ridge, a bend, a tower.","To take a bearing: lay the compass edge from you to your destination, rotate the housing until its lines match the map's north lines, read the number.","To walk it: hold the compass flat, turn your body until the needle sits in the housing arrow, walk toward a visible landmark on that line.","Contour lines close together mean steep. Count them for height gain.","Always know your last certain position and your escape route."],
+x:"Print or borrow a map of somewhere you know and orient it correctly without looking at the phone."},
+
+{id:"water2",c:"Outdoors",t:"Make water safe to drink",m:7,
+w:"Clear water isn't safe water. Two independent methods worth knowing before you need them.",
+s:["Filter the sediment first through cloth — filtering and disinfecting are different jobs.","Boil: a rolling boil for one minute kills the biological threats. Three minutes above 2000m.","No fire? Chemical tablets or unscented household bleach — a couple of drops per litre, stir, wait 30 minutes. It should smell faintly of chlorine.","Neither method removes chemical pollution or heavy metals. Choose your source: flowing beats still, upstream of everything.","Solar: clear PET bottle, full sun, six hours, laid on a reflective surface."],
+x:"Check whether you have any way to treat water at home. Boiling counts — but only if you can still boil."},
+
+{id:"ears",c:"Body",t:"Equalise your ears",m:5,
+w:"Painful ears on planes, lifts, and underwater are a pressure problem with several fixes ranked by gentleness.",
+s:["Swallow or yawn first — that opens the tube naturally.","Frenzel: pinch your nose and make a hard 'k' sound with the back of your tongue. Gentle and effective.","Valsalva: pinch your nose and blow gently against it. Gently — hard blowing can damage the ear.","Equalise early and often on descent, before you feel pressure. Once it's painful it's harder to clear.","Never force it with a blocked nose or a cold. That's how people rupture an eardrum."],
+x:"Try the 'k' sound method now. Most people have only ever used the blowing one."},
+
+{id:"numb",c:"Home",t:"Hang something on a wall so it stays",m:7,
+w:"The nail that pulls out with a chunk of plaster is a fixings problem, not a bad-luck problem.",
+s:["Find out what the wall is: tap it. Hollow means plasterboard, solid means brick or concrete.","Plasterboard, light load: a hook straight into board is fine under about 5kg.","Plasterboard, heavy: find a stud, or use a proper toggle or spring anchor. Plain plastic plugs fail in plasterboard.","Brick or concrete: drill with a masonry bit on hammer setting, blow out the dust, plastic plug, screw.","Check for pipes and cables before drilling — never drill directly above or below a socket or switch.","Two fixings level beats one strong one for anything wide."],
+x:"Tap the walls in your home and find out which are hollow. It takes a minute and saves a repair."},
+
+{id:"speech",c:"Social",t:"Speak without filler words",m:6,
+w:"'Um' and 'like' are what your mouth does while your brain catches up. The fix is a pause, and pauses sound confident.",
+s:["Record yourself for two minutes. You have to hear it to fix it.","Replace fillers with silence. It feels endless to you and reads as authority to everyone else.","Slow down about 15%. Most filler comes from talking faster than you're thinking.","Finish sentences fully instead of trailing into the next thought.","Land the end of a sentence and stop. Trailing off invites interruption."],
+x:"Record a two-minute answer to 'what do you do?' and count your fillers. Then do it again."},
+
+{id:"knifeskills",c:"Kitchen",t:"Hold a knife like you mean it",m:6,
+w:"The handle grip most people use gives away all control. Two changes and your cutting gets faster and safer immediately.",
+s:["Pinch the blade: thumb and index finger on the blade itself, just past the handle. Remaining fingers wrap the handle.","Guide hand makes a claw — fingertips curled under, knuckles forward against the flat of the blade.","Cut by pushing forward and down, or pulling back and down. Chopping straight down crushes.","Keep the tip on the board and rock through for herbs.","Never catch a falling knife. Step back."],
+x:"Do one board of vegetables with the pinch grip. It feels wrong for two minutes and better after."}
+];
+
+/* ---------------------------------------------------------------
+   STORAGE — window.storage in Claude, localStorage if self-hosted
+--------------------------------------------------------------- */
+const mem = {};
+const hasWS = typeof window !== "undefined" && window.storage && typeof window.storage.get === "function";
+const Store = {
+  async get(k){
+    if(hasWS){ try{ const r = await window.storage.get(k,false); return r ? JSON.parse(r.value) : null; }catch(e){ return null; } }
+    try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return k in mem ? mem[k] : null; }
+  },
+  async set(k,v){
+    if(hasWS){ try{ await window.storage.set(k, JSON.stringify(v), false); return true; }catch(e){ return false; } }
+    try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ mem[k]=v; return true; }
+  }
+};
+const K_USERS = "skillseed:users";
+const K_SESS  = "skillseed:session";
+const kUser   = n => "skillseed:u:" + n;
+
+/* ---------------------------------------------------------------
+   HELPERS
+--------------------------------------------------------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dayNum = iso => Math.floor(new Date(iso+"T00:00:00").getTime()/864e5);
+const pretty = iso => new Date(iso+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+function hash(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function shuffled(seedStr){
+  let s = hash(seedStr) || 1;
+  const rnd = () => (s = (s*1664525+1013904223)>>>0) / 4294967296;
+  const a = SKILLS.map(x=>x.id);
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+const byId = id => SKILLS.find(s=>s.id===id);
+
+/* ---------------------------------------------------------------
+   STATE
+--------------------------------------------------------------- */
+let USER = null;   // lowercase key
+let LABEL = "";    // display name
+let DATA = null;   // {start, order, learned:{id:date}}
+let mode = "in";   // "in" | "new"
+let viewing = null;
+
+/* ---------------------------------------------------------------
+   AUTH
+--------------------------------------------------------------- */
+function renderSwap(){
+  $("#swaprow").innerHTML = mode==="in"
+    ? 'New here? <button id="swap">Create an account</button>'
+    : 'Already have one? <button id="swap">Sign in</button>';
+  $("#go").textContent = mode==="in" ? "Sign in" : "Create account";
+  $("#plabel").textContent = mode==="in" ? "4-digit code" : "Choose a 4-digit code";
+  $("#p").setAttribute("autocomplete", mode==="in" ? "current-password" : "new-password");
+  $("#swap").onclick = () => { mode = mode==="in" ? "new" : "in"; $("#gatemsg").textContent=""; renderSwap(); };
+}
+async function submitGate(){
+  const raw = $("#u").value.trim();
+  const pin = $("#p").value.trim();
+  const msg = $("#gatemsg");
+  if(raw.length < 2){ msg.textContent = "Enter a name with at least 2 characters."; return; }
+  if(!/^\d{4}$/.test(pin)){ msg.textContent = "The code needs to be exactly 4 digits."; return; }
+  const key = raw.toLowerCase();
+  const users = (await Store.get(K_USERS)) || {};
+  if(mode==="new"){
+    if(users[key]){ msg.textContent = "That name is taken here. Sign in instead, or pick another."; return; }
+    users[key] = { pin: hash(pin+"::"+key), label: raw };
+    await Store.set(K_USERS, users);
+    await Store.set(kUser(key), { start: today(), order: shuffled(key), learned: {} });
+  } else {
+    if(!users[key]){ msg.textContent = "No account with that name yet. Create one below."; return; }
+    if(users[key].pin !== hash(pin+"::"+key)){ msg.textContent = "That code doesn't match."; return; }
+  }
+  await Store.set(K_SESS, key);
+  await start(key, users[key].label || raw);
+}
+async function start(key, label){
+  USER = key; LABEL = label;
+  DATA = (await Store.get(kUser(key))) || { start: today(), order: shuffled(key), learned: {} };
+  if(!DATA.order || !DATA.order.length) DATA.order = shuffled(key);
+  // add any skills released since the account was made, at the end
+  const known = new Set(DATA.order);
+  SKILLS.forEach(s => { if(!known.has(s.id)) DATA.order.push(s.id); });
+  $("#gate").style.display = "none";
+  $("#app").classList.add("on");
+  $("#signout").textContent = LABEL + " · sign out";
+  render();
+}
+async function save(){ await Store.set(kUser(USER), DATA); }
+
+/* ---------------------------------------------------------------
+   PROGRESS MATH
+--------------------------------------------------------------- */
+const dayIndex = () => Math.max(0, Math.min(DATA.order.length-1, dayNum(today()) - dayNum(DATA.start)));
+const dateForIndex = i => { const d = new Date((dayNum(DATA.start)+i)*864e5); return d.toISOString().slice(0,10); };
+const todaySkill = () => byId(DATA.order[dayIndex()]);
+function streak(){
+  let n = 0, d = dayNum(today());
+  const learnedDays = new Set(Object.values(DATA.learned).map(dayNum));
+  if(!learnedDays.has(d)) d -= 1;                 // today still counts if yesterday was done
+  while(learnedDays.has(d)){ n++; d--; }
+  return n;
+}
+const isLearned = id => !!DATA.learned[id];
+
+/* ---------------------------------------------------------------
+   RENDER
+--------------------------------------------------------------- */
+function renderSpine(){
+  const idx = dayIndex(), first = Math.max(0, idx-13);
+  let h = "";
+  for(let i=first;i<=idx;i++){
+    const id = DATA.order[i];
+    const cls = isLearned(id) ? "done" : (i===idx ? "today" : "");
+    h += '<span class="notch '+cls+'" title="Day '+(i+1)+'"></span>';
+  }
+  $("#spine").innerHTML = h;
+  $("#spineleft").textContent = "Day " + (idx+1);
+  const s = streak();
+  $("#spineright").textContent = s > 1 ? s + " days in a row" : Object.keys(DATA.learned).length + " learned";
+}
+
+function skillHTML(sk, opts){
+  const learned = isLearned(sk.id);
+  return `
+    <p class="kicker">${esc(sk.c)}</p>
+    <h1 class="title">${esc(sk.t)}</h1>
+    <p class="meta">${opts.dayLabel} · about ${sk.m} minutes</p>
+    <p class="why">${esc(sk.w)}</p>
+    <ol class="steps">${sk.s.map(x=>"<li>"+esc(x)+"</li>").join("")}</ol>
+    <div class="trybox"><h3>Try it today</h3><p>${esc(sk.x)}</p></div>
+    <div id="actionslot">${
+      learned
+      ? `<div class="done-note"><span class="tick">✓</span> Learned ${pretty(DATA.learned[sk.id])}</div>`
+      : `<button class="btn" id="markbtn">Mark as learned</button>`
+    }</div>`;
+}
+
+function renderToday(){
+  const sk = todaySkill();
+  $("#v-today").innerHTML = skillHTML(sk, { dayLabel: "Day " + (dayIndex()+1) });
+  const b = $("#markbtn");
+  if(b) b.onclick = async () => {
+    DATA.learned[sk.id] = today();
+    await save();
+    $("#actionslot").innerHTML = `<div class="done-note pop"><span class="tick">✓</span> Learned ${pretty(today())}</div>`;
+    renderSpine();
+  };
+}
+
+function renderLog(q){
+  const idx = dayIndex();
+  const rows = [];
+  for(let i=idx;i>=0;i--){
+    const sk = byId(DATA.order[i]);
+    if(!sk) continue;
+    if(q && !(sk.t+" "+sk.c+" "+sk.w).toLowerCase().includes(q)) continue;
+    rows.push(
+      `<button class="entry" data-id="${sk.id}" data-day="${i+1}">
+         <span class="day">Day ${i+1} · ${pretty(dateForIndex(i))}${isLearned(sk.id)?" · <em>learned</em>":""}</span>
+         <span class="name">${esc(sk.t)}</span>
+       </button>`);
+  }
+  $("#v-log").innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${idx+1}</b><span>days in</span></div>
+      <div class="stat"><b>${Object.keys(DATA.learned).length}</b><span>marked learned</span></div>
+      <div class="stat"><b>${streak()}</b><span>day streak</span></div>
+    </div>
+    <input class="searchbar" id="q" placeholder="Search your past skills" value="${q?esc(q):""}">
+    ${rows.length ? rows.join("") : '<p class="empty">Nothing matches that. Try a shorter word, or the category — kitchen, emergency, money.</p>'}`;
+  const qi = $("#q");
+  qi.oninput = e => { const v = e.target.value.toLowerCase(); renderLog(v); const f=$("#q"); f.focus(); f.setSelectionRange(f.value.length,f.value.length); };
+  document.querySelectorAll("#v-log .entry").forEach(el => {
+    el.onclick = () => openSkill(el.dataset.id, el.dataset.day);
+  });
+}
+
+function openSkill(id, day){
+  const sk = byId(id);
+  viewing = id;
+  $("#v-log").innerHTML = `<button class="backlink" id="back">← Back to the log</button>` + skillHTML(sk, { dayLabel: "Day " + day });
+  window.scrollTo(0,0);
+  $("#back").onclick = () => renderLog("");
+  const b = $("#markbtn");
+  if(b) b.onclick = async () => {
+    DATA.learned[id] = today();
+    await save();
+    $("#actionslot").innerHTML = `<div class="done-note pop"><span class="tick">✓</span> Learned ${pretty(today())}</div>`;
+    renderSpine();
+  };
+}
+
+function renderShelf(){
+  const idx = dayIndex();
+  const left = DATA.order.length - (idx+1);
+  const cats = {};
+  DATA.order.slice(0, idx+1).forEach(id => { const s = byId(id); if(s) cats[s.c] = (cats[s.c]||0)+1; });
+  const list = Object.entries(cats).sort((a,b)=>b[1]-a[1])
+    .map(([c,n]) => `<button class="entry" data-cat="${esc(c)}"><span class="day">${n} opened</span><span class="name">${esc(c)}</span></button>`).join("");
+  $("#v-shelf").innerHTML = `
+    <h1 class="title" style="font-size:28px">What you've collected</h1>
+    <p class="why">${idx+1} skills opened, ${Object.keys(DATA.learned).length} practised, ${left} still sealed. A new one unlocks every day at midnight — you can't rush it, and you can't miss it either.</p>
+    ${list}
+    <p class="empty">Tap a category to search the log for it.</p>`;
+  document.querySelectorAll("#v-shelf .entry").forEach(el => {
+    el.onclick = () => { switchTo("log"); renderLog(el.dataset.cat.toLowerCase()); };
+  });
+}
+
+function switchTo(v){
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.v===v));
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id==="v-"+v));
+  window.scrollTo(0,0);
+  if(v==="today") renderToday();
+  if(v==="log") renderLog("");
+  if(v==="shelf") renderShelf();
+}
+function render(){ renderSpine(); renderToday(); }
+
+/* ---------------------------------------------------------------
+   WIRE UP
+--------------------------------------------------------------- */
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => switchTo(t.dataset.v));
+$("#go").onclick = submitGate;
+$("#p").addEventListener("keydown", e => { if(e.key==="Enter") submitGate(); });
+$("#u").addEventListener("keydown", e => { if(e.key==="Enter") $("#p").focus(); });
+$("#signout").onclick = async () => {
+  await Store.set(K_SESS, null);
+  USER = null; DATA = null;
+  $("#app").classList.remove("on");
+  $("#gate").style.display = "flex";
+  $("#p").value = "";
+  $("#gatemsg").textContent = "";
+};
+
+(async function init(){
+  renderSwap();
+  const users = (await Store.get(K_USERS)) || {};
+  const sess = await Store.get(K_SESS);
+  if(sess && users[sess]){ await start(sess, users[sess].label || sess); return; }
+  if(!Object.keys(users).length){ mode = "new"; renderSwap(); }
+  $("#u").focus();
+})();
+</script>
